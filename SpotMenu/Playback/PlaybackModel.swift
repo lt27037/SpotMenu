@@ -78,6 +78,9 @@ protocol MusicPlayerController {
     func toggleLiked()
     func likeTrack()
     func unlikeTrack()
+    func getVolume() -> Double?
+    func setVolume(to value: Double)
+    func changeVolume(by delta: Double)
 }
 
 class PlaybackModel: ObservableObject {
@@ -91,6 +94,8 @@ class PlaybackModel: ObservableObject {
     @Published var playerType: PlayerType
     @Published var isLiked: Bool? = nil
     @Published var longFormInfo: LongFormInfo? = nil
+    @Published var volume: Double = 50
+    @Published var supportsVolumeControl: Bool = false
 
     private let preferences: MusicPlayerPreferencesModel
     private var controller: MusicPlayerController
@@ -136,6 +141,18 @@ class PlaybackModel: ObservableObject {
         controller = newController
         playerType = newType
         fetchInfo()
+    }
+    
+    func setVolume(to value: Double) {
+        let clamped = max(0, min(100, value))
+        controller.setVolume(to: clamped)
+        volume = clamped
+    }
+
+    func changeVolume(by delta: Double) {
+        let newValue = max(0, min(100, volume + delta))
+        controller.setVolume(to: newValue)
+        volume = newValue
     }
 
     private static func selectController(
@@ -187,6 +204,7 @@ class PlaybackModel: ObservableObject {
             return
         }
 
+        let currentVolume = controller.getVolume()
         let displayText = computeDisplayText(from: info)
 
         DispatchQueue.main.async {
@@ -199,6 +217,11 @@ class PlaybackModel: ObservableObject {
             self.image = info.image
             self.isLiked = info.isLiked
             self.longFormInfo = info.longFormInfo
+            
+            self.supportsVolumeControl = currentVolume != nil
+            if let currentVolume {
+                self.volume = currentVolume
+            }
 
             NotificationCenter.default.post(
                 name: .contentModelDidUpdate,

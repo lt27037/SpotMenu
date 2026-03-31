@@ -84,6 +84,16 @@ class AppleMusicController: MusicPlayerController {
 
         return nil
     }
+    
+    func getVolume() -> Double? {
+        return nil
+    }
+
+    func setVolume(to value: Double) {
+    }
+
+    func changeVolume(by delta: Double) {
+    }
 
     func togglePlayPause() {
         let state = fetchNowPlayingInfo()?.isPlaying == true ? "pause" : "play"

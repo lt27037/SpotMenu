@@ -139,6 +139,29 @@ struct PlaybackView: View {
                 }
                 .foregroundColor(preferences.foregroundColor.color)
 
+                if model.supportsVolumeControl {
+                    HStack(spacing: 10) {
+                        Image(systemName: "speaker.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 16, height: 16)
+
+                        Slider(
+                            value: Binding(
+                                get: { model.volume },
+                                set: { model.setVolume(to: $0) }
+                            ),
+                            in: 0...100
+                        )
+
+                        Text("\(Int(model.volume))%")
+                            .font(.body.monospacedDigit())
+                            .frame(minWidth: 44, alignment: .trailing)
+                    }
+                    .foregroundColor(preferences.foregroundColor.color)
+                    .padding(.horizontal)
+                }
+
                 Text(model.title)
                     .font(.title3)
                     .foregroundColor(preferences.foregroundColor.color)

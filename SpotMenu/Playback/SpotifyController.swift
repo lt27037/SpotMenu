@@ -121,6 +121,41 @@ class SpotifyController: MusicPlayerController {
             longFormInfo: longFormInfo
         )
     }
+    
+    func getVolume() -> Double? {
+        let script = """
+        tell application "Spotify"
+            if it is running then
+                return sound volume
+            end if
+        end tell
+        """
+
+        guard let output = runAppleScript(script)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              let value = Double(output) else {
+            return nil
+        }
+
+        return value
+    }
+
+    func setVolume(to value: Double) {
+        let clamped = max(0, min(100, Int(value.rounded())))
+        let script = """
+        tell application "Spotify"
+            if it is running then
+                set sound volume to \(clamped)
+            end if
+        end tell
+        """
+        _ = runAppleScript(script)
+    }
+
+    func changeVolume(by delta: Double) {
+        let current = getVolume() ?? 50
+        setVolume(to: current + delta)
+    }
 
     func togglePlayPause() {
         let state = fetchNowPlayingInfo()?.isPlaying == true ? "pause" : "play"
